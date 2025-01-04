@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="himanshu" />
+    <title>Student Registration System</title>
+    <link href="output.css" rel="stylesheet" />
+    <style>
+      #student-table-wrapper {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 0.5rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 12px;
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-yellow-300 to-yellow-500 min-h-screen">
+    <header class="py-6 bg-yellow-400 shadow-lg text-center">
+      <h1 class="text-4xl font-bold text-gray-500 drop-shadow-lg">
+        Student Registration System
+      </h1>
+    </header>
+    <section
+      class="flex flex-col lg:flex-row justify-center items-center gap-8 py-10"
+    >
+      <div class="shadow-lg rounded-lg p-6 w-full lg:w-1/3">
+        <form id="submit-form">
+          <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2" for="name"
+              >Student Name:</label
+            >
+            <input
+              class="rounded-lg w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              id="name"
+              name="name"
+              type="text"
+              required
+              aria-label="Student Name"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2" for="id"
+              >Student ID:</label
+            >
+            <input
+              class="rounded-lg w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              id="id"
+              name="id"
+              type="number"
+              required
+              aria-label="Student ID"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label
+              class="block text-gray-700 font-medium mb-2"
+              for="studentEmail"
+              >Email:</label
+            >
+            <input
+              class="rounded-lg w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              id="studentEmail"
+              name="studentEmail"
+              type="email"
+              required
+              aria-label="Student Class"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2" for="roll"
+              >Roll Number:</label
+            >
+            <input
+              class="rounded-lg w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              id="roll"
+              name="roll"
+              type="number"
+              required
+              aria-label="Roll Number"
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-1/2 bg-red-500 text-white rounded-lg py-2 hover:bg-red-600 transition"
+          >
+            Add Student
+          </button>
+        </form>
+      </div>
+
+      <div class="w-full lg:w-2/4">
+        <div id="student-table-wrapper" class="bg-white shadow-lg rounded-lg">
+          <table class="w-full text-sm text-gray-700">
+            <thead class="bg-gray-100 sticky top-0">
+              <tr>
+                <th class="text-left py-3 px-4 border-b font-semibold">Name</th>
+                <th class="text-left py-3 px-4 border-b font-semibold">ID</th>
+                <th class="text-left py-3 px-4 border-b font-semibold">
+                  Email
+                </th>
+                <th class="text-left py-3 px-4 border-b font-semibold">Roll</th>
+              </tr>
+            </thead>
+            <tbody id="student-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("submit-form");
+        const table = document.getElementById("student-table");
+
+        // Load existing data from local storage and display it
+        const storedStudents =
+          JSON.parse(localStorage.getItem("students")) || [];
+        storedStudents.forEach((student, index) =>
+          addRowToTable(student, index)
+        );
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          const name = document.getElementById("name").value;
+          const id = document.getElementById("id").value;
+          const studentEmail = document.getElementById("studentEmail").value;
+          const roll = document.getElementById("roll").value;
+
+          const student = { name, id, studentEmail, roll };
+
+          storedStudents.push(student);
+          localStorage.setItem("students", JSON.stringify(storedStudents));
+          addRowToTable(student, storedStudents.length - 1);
+
+          form.reset();
+        });
+
+        function addRowToTable(student, index) {
+          const row = document.createElement("tr");
+          row.setAttribute("data-index", index);
+
+          row.innerHTML = `
+      <td class="py-3 px-4 border-b">${student.name}</td>
+      <td class="py-3 px-4 border-b">${student.id}</td>
+      <td class="py-3 px-4 border-b">${student.studentEmail}</td>
+      <td class="py-3 px-4 border-b">${student.roll}</td>
+      <td class="py-3 px-4 border-b flex justify-around">
+        <button class="edit-btn bg-blue-500 text-white px-2 py-1 rounded">Edit</button>
+        <button class="delete-btn bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+      </td>
+    `;
+
+          table.appendChild(row);
+
+          row
+            .querySelector(".edit-btn")
+            .addEventListener("click", () => editStudent(index));
+          row
+            .querySelector(".delete-btn")
+            .addEventListener("click", () => deleteStudent(index));
+        }
+
+        function editStudent(index) {
+          const student = storedStudents[index];
+
+          document.getElementById("name").value = student.name;
+          document.getElementById("id").value = student.id;
+          document.getElementById("studentEmail").value = student.studentEmail;
+          document.getElementById("roll").value = student.roll;
+
+          deleteStudent(index, false);
+          document.getElementById("name").focus();
+        }
+        function deleteStudent(index, updateStorage = true) {
+          storedStudents.splice(index, 1);
+          if (updateStorage) {
+            localStorage.setItem("students", JSON.stringify(storedStudents));
+          }
+          refreshTable();
+        }
+
+        function refreshTable() {
+          table.innerHTML = "";
+          storedStudents.forEach((student, index) =>
+            addRowToTable(student, index)
+          );
+        }
+      });
+    </script>
+  </body>
+</html>
